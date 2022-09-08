@@ -1,13 +1,15 @@
 # Python
+import json
 from typing import List
 from enum import Enum
 
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
+from fastapi import Body
 
 # Models
-from models import User, UserBase, UserLogin
+from models import User, UserRegister, UserBase, UserLogin
 from models import Tweet, TweetBase
 
 app = FastAPI()
@@ -31,7 +33,7 @@ class Tags(Enum):
     tags=[Tags.users],
     summary='Register a User'
 )
-def signup():
+def signup(user: UserRegister = Body(...)):
     """
     SignUp
 
@@ -47,9 +49,31 @@ def signup():
     - first_name: str
     - last_name: str
     - country: Optional[str]
-    - birthday: Optional[str]
+    - birthday: Optional[PastDate]
     - creation_date: PastDate
     """
+    with open("users.json", "r+", encoding="utf-8") as f:
+        # Reading users.json and convert it to a dict
+        content = f.read()
+        results = json.loads(content)
+
+        # Receive new user
+        user_dict = user.dict()
+        user_dict["user_id"] = str(user_dict["user_id"])
+        user_dict["birth_date"] = str(user_dict["birth_date"])
+        user_dict["creation_date"] = str(user_dict["creation_date"])
+
+        # Add new user to user.json
+        results.append(user_dict)
+
+        # Move to the first line of the file
+        f.seek(0)
+
+        # Writing the new user list
+        json_user_list = json.dumps(results)
+        f.write(json_user_list)
+
+        return user
 
 
 ### Login a user
