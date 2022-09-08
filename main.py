@@ -8,7 +8,7 @@ from fastapi import status
 
 # Models
 from models import User, UserBase, UserLogin
-from models import TweetBase
+from models import Tweet, TweetBase
 
 app = FastAPI()
 
@@ -21,12 +21,9 @@ class Tags(Enum):
 
 # Path Operations
 
-@app.get(path="/")
-def home():
-    return {"Twitter API": "Working!!"}
-
-
 ## Users
+
+### Register a user
 @app.post(
     path="/signup",
     response_model=User,
@@ -38,6 +35,7 @@ def signup():
     pass
 
 
+### Login a user
 @app.post(
     path="/login",
     response_model=User,
@@ -49,6 +47,7 @@ def login():
     pass
 
 
+### Show all users
 @app.get(
     path="/users",
     response_model=List[User],
@@ -60,6 +59,7 @@ def show_all_users():
     pass
 
 
+### Show a user
 @app.get(
     path="/user/{user_id}",
     response_model=User,
@@ -71,6 +71,7 @@ def show_user():
     pass
 
 
+### Delete a user
 @app.delete(
     path="/users/{user_id}/delete",
     response_model=User,
@@ -82,6 +83,7 @@ def delete_user():
     pass
 
 
+### Update a user
 @app.put(
     path="/users/{user_id}/update",
     response_model=User,
@@ -94,20 +96,35 @@ def update_user():
 
 
 ## Tweets
+
+### Show all tweets
+@app.get(
+    path="/",
+    response_model=List[Tweet],
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.tweets],
+    summary="Show all tweets"
+)
+def home():
+    return {"Twitter API": "Working!!"}
+
+
+### Post a tweet
 @app.post(
     path="/post",
-    response_model=TweetBase,
+    response_model=Tweet,
     status_code=status.HTTP_201_CREATED,
     tags=[Tags.tweets],
-    summary='Create a tweet'
+    summary='Post a tweet'
 )
-def create_tweet():
+def post_tweet():
     pass
 
 
+### Show a tweet
 @app.get(
     path="/tweets/{tweet_id}",
-    response_model=TweetBase,
+    response_model=Tweet,
     status_code=status.HTTP_200_OK,
     tags=[Tags.tweets],
     summary='Show a specific tweet'
@@ -116,9 +133,10 @@ def show_tweet():
     pass
 
 
+### Delete a tweet
 @app.delete(
     path="/tweets/{tweet_id}/delete",
-    response_model=TweetBase,
+    response_model=Tweet,
     status_code=status.HTTP_200_OK,
     tags=[Tags.tweets],
     summary='Delete a specific tweet'
@@ -127,9 +145,10 @@ def delete_tweet():
     pass
 
 
+### Update a tweet
 @app.put(
     path="/tweets/{tweet_id}/update",
-    response_model=TweetBase,
+    response_model=Tweet,
     status_code=status.HTTP_200_OK,
     tags=[Tags.tweets],
     summary='Update a specific tweet'

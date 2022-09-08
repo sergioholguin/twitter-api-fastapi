@@ -50,3 +50,6 @@ class TweetBase(BaseModel):
     updated_at: Optional[datetime] = Field(default=None)
     by: User = Field(...)
 
+
+class Tweet(TweetBase):
+    pass
