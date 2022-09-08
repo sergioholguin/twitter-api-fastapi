@@ -32,7 +32,24 @@ class Tags(Enum):
     summary='Register a User'
 )
 def signup():
-    pass
+    """
+    SignUp
+
+    This path operation register a user in the app
+
+    Parameters:
+    - Request Body parameters:
+        - **user: UserRegister**
+
+    Returns a json with the basic user information:
+    - user_id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - country: Optional[str]
+    - birthday: Optional[str]
+    - creation_date: PastDate
+    """
 
 
 ### Login a user

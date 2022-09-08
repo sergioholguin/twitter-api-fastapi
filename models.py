@@ -14,8 +14,12 @@ class UserBase(BaseModel):
     email: EmailStr = Field(...)
 
 
-class UserLogin(UserBase):
+class Password(BaseModel):
     password: str = Field(..., min_length=8, max_length=64)
+
+
+class UserLogin(UserBase, Password):
+    pass
 
 
 class User(UserBase):
@@ -35,12 +39,11 @@ class User(UserBase):
         max_length=50
     )
     birth_date: Optional[PastDate] = Field(default=None)
-    age: int = Field(
-        ...,
-        gt=0,
-        le=100
-    )
     creation_date: PastDate
+
+
+class UserRegister(User, Password):
+    pass
 
 
 class TweetBase(BaseModel):
