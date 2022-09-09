@@ -2,6 +2,7 @@
 import json
 from typing import List
 from enum import Enum
+from uuid import UUID, uuid4
 
 # FastAPI
 from fastapi import FastAPI
@@ -11,6 +12,10 @@ from fastapi import Body
 # Models
 from models import User, UserRegister, UserBase, UserLogin
 from models import Tweet, TweetBase
+
+# Examples
+from examples import Examples
+
 
 app = FastAPI()
 
@@ -33,7 +38,7 @@ class Tags(Enum):
     tags=[Tags.users],
     summary='Register a User'
 )
-def signup(user: UserRegister = Body(...)):
+def signup(user: UserRegister = Body(..., examples=Examples.singup)):
     """
     SignUp
 
@@ -50,7 +55,7 @@ def signup(user: UserRegister = Body(...)):
     - last_name: str
     - country: Optional[str]
     - birthday: Optional[PastDate]
-    - creation_date: PastDate
+    - creation_account_date: PastDate
     """
     with open("users.json", "r+", encoding="utf-8") as f:
         # Reading users.json and convert it to a dict
@@ -59,9 +64,9 @@ def signup(user: UserRegister = Body(...)):
 
         # Receive new user
         user_dict = user.dict()
-        user_dict["user_id"] = str(user_dict["user_id"])
+        user_dict["user_id"] = str(uuid4())
         user_dict["birth_date"] = str(user_dict["birth_date"])
-        user_dict["creation_date"] = str(user_dict["creation_date"])
+        user_dict["creation_account_date"] = str(user_dict["creation_account_date"])
 
         # Add new user to user.json
         results.append(user_dict)
@@ -73,7 +78,7 @@ def signup(user: UserRegister = Body(...)):
         json_user_list = json.dumps(results)
         f.write(json_user_list)
 
-        return user
+        return user_dict
 
 
 ### Login a user
@@ -109,7 +114,7 @@ def show_all_users():
     - last_name: str
     - country: Optional[str]
     - birthday: Optional[PastDate]
-    - creation_date: PastDate
+    - creation_account_date: PastDate
     """
 
     with open("users.json", "r", encoding="utf-8") as f:
@@ -166,7 +171,24 @@ def update_user():
     summary="Show all tweets"
 )
 def home():
-    return {"Twitter API": "Working!!"}
+    """
+    This path operation show all tweets in the app
+
+    No-Parameters
+
+    Returns a json list with all tweets in the app with the following keys:
+    - tweet_id: UUID
+    - content: str
+    - created_at: datetime
+    - updated_at: Optional[datetime]
+    - by: User
+    """
+
+    with open("tweets.json", "r", encoding="utf-8") as f:
+        content = f.read()
+        results = json.loads(content)
+
+        return results
 
 
 ### Post a tweet
@@ -209,7 +231,7 @@ def post_tweet(tweet: Tweet = Body(...)):
 
         tweet_dict["by"]["user_id"] = str(tweet_dict["by"]["user_id"])
         tweet_dict["by"]["birth_date"] = str(tweet_dict["by"]["birth_date"])
-        tweet_dict["by"]["creation_date"] = str(tweet_dict["by"]["creation_date"])
+        tweet_dict["by"]["creation_account_date"] = str(tweet_dict["by"]["creation_account_date"])
 
         # Add new tweet to tweet.json
         results.append(tweet_dict)

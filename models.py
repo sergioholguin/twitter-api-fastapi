@@ -1,6 +1,6 @@
 # Python
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 from datetime import date, datetime
 
 # Pydantic
@@ -9,8 +9,11 @@ from pydantic import Field
 from pydantic import EmailStr, PastDate
 
 
+class UserID(BaseModel):
+    user_id: UUID = Field(default_factory=uuid4)
+
+
 class UserBase(BaseModel):
-    user_id: UUID = Field(...)
     email: EmailStr = Field(...)
 
 
@@ -22,11 +25,11 @@ class UserLogin(UserBase, Password):
     pass
 
 
-class User(UserBase):
+class UserInfo(UserBase):
     first_name: str = Field(
         ...,
         min_length=1,
-        max_length=50
+        max_length=50,
     )
     last_name: str = Field(
         ...,
@@ -39,10 +42,14 @@ class User(UserBase):
         max_length=50
     )
     birth_date: Optional[PastDate] = Field(default=None)
-    creation_date: PastDate
+    creation_account_date: PastDate
 
 
-class UserRegister(User, Password):
+class User(UserInfo, UserID):
+    pass
+
+
+class UserRegister(UserInfo, Password):
     pass
 
 
