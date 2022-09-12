@@ -4,8 +4,8 @@ from typing import List
 
 # FastAPI
 from fastapi import APIRouter
-from fastapi import status
-from fastapi import Body
+from fastapi import status, HTTPException
+from fastapi import Path, Body
 
 # Models
 from models import Tweet

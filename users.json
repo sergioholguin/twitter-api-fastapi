@@ -1,23 +1,13 @@
 [
   {
-    "password": "stringst",
-    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "email": "user@example.com",
-    "first_name": "string",
-    "last_name": "string",
-    "country": "string",
-    "birth_date": "2021-09-08",
-    "creation_account_date": "2021-09-08"
-  },
-  {
-    "password": "holasoymiguel",
-    "user_id": "3fa85f64-5717-4562-b3fc-2c943f66afa3",
-    "email": "user@example.com",
-    "first_name": "miguel",
-    "last_name": "sadfadf",
-    "country": "string",
-    "birth_date": "2021-09-08",
-    "creation_account_date": "2021-09-08"
+    "password": "thisisanotherpassword",
+    "email": "fer@example.com",
+    "first_name": "Fernandino",
+    "last_name": "SomeLastName",
+    "country": "Island",
+    "birth_date": "2000-01-01",
+    "creation_account_date": "2010-09-09",
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
   },
   {
     "password": "holaquetal",
@@ -50,13 +40,13 @@
     "user_id": "f097222b-ae18-4739-bf68-f6b57635849a"
   },
   {
-    "password": "thisistheazucenapassword",
-    "email": "azucena@example.com",
-    "first_name": "Azucena",
+    "password": "thisisthepedropassword",
+    "email": "pedro@example.com",
+    "first_name": "Pedro",
     "last_name": "SomeLastName",
-    "country": "Peru",
-    "birth_date": "2006-01-01",
-    "creation_account_date": "2016-09-09",
+    "country": "Colombia",
+    "birth_date": "2000-01-01",
+    "creation_account_date": "2010-09-09",
     "user_id": "731b0e35-64ce-4de2-8746-47ac3fe9ee8b"
   }
 ]

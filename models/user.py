@@ -49,3 +49,7 @@ class User(UserInfo, UserID):
 
 class UserRegister(UserInfo, Password):
     pass
+
+
+class UserDeleted(UserID, UserBase):
+    delete_message: str = Field(default="User has been deleted!")

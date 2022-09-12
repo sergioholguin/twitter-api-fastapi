@@ -42,6 +42,23 @@ signup_examples = {
 }
 
 
+id_examples = {
+    "example-1": {
+        "summary": "First Example",
+        "value": "731b0e35-64ce-4de2-8746-47ac3fe9ee8b"
+    },
+    "example-2": {
+        "summary": "Second Example",
+        "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    },
+    "example-3": {
+        "summary": "Third Example",
+        "value": "3fa85f64-5717-4562-b3fc-2c943f66afa3",
+    }
+}
+
+
 # Enum
 class UserExamples(Enum):
-    singup = signup_examples
+    user_info = signup_examples
+    user_id = id_examples
