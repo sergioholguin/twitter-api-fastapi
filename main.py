@@ -10,8 +10,7 @@ from fastapi import status
 from fastapi import Body
 
 # Models
-from models import User, UserRegister, UserBase, UserLogin
-from models import Tweet, TweetBase
+from models import User, UserRegister, UserLogin, Tweet
 
 # Examples
 from examples import Examples
