@@ -1,7 +1,6 @@
 # Python
 import json
 from typing import List
-from uuid import UUID, uuid4
 
 # FastAPI
 from fastapi import APIRouter
@@ -15,7 +14,6 @@ from models import Tweet
 from .tags import Tags
 
 # Examples
-from examples import Examples
 
 
 router = APIRouter(tags=[Tags.tweets])

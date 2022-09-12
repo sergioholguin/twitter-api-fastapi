@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-# Examples
+# User Path Operation Examples
 signup_examples = {
     "example-1": {
         "summary": "First Example",
@@ -41,11 +41,7 @@ signup_examples = {
     }
 }
 
-post_tweet_examples = {
-
-}
-
 
 # Enum
-class Examples(Enum):
+class UserExamples(Enum):
     singup = signup_examples

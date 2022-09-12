@@ -1,7 +1,7 @@
 # Python
 import json
 from typing import List
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 # FastAPI
 from fastapi import APIRouter
@@ -9,13 +9,13 @@ from fastapi import status
 from fastapi import Body
 
 # Models
-from models import User, UserRegister, UserLogin
+from models import User, UserRegister
 
 # Tags
 from .tags import Tags
 
 # Examples
-from examples import Examples
+from examples import UserExamples
 
 
 router = APIRouter(tags=[Tags.users])
@@ -30,7 +30,7 @@ router = APIRouter(tags=[Tags.users])
     status_code=status.HTTP_201_CREATED,
     summary='Register a User'
 )
-def signup(user: UserRegister = Body(..., examples=Examples.singup)):
+def signup(user: UserRegister = Body(..., examples=UserExamples.singup)):
     """
     SignUp
 

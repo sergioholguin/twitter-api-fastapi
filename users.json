@@ -48,5 +48,15 @@
     "birth_date": "2003-01-01",
     "creation_account_date": "2013-09-09",
     "user_id": "f097222b-ae18-4739-bf68-f6b57635849a"
+  },
+  {
+    "password": "thisistheazucenapassword",
+    "email": "azucena@example.com",
+    "first_name": "Azucena",
+    "last_name": "SomeLastName",
+    "country": "Peru",
+    "birth_date": "2006-01-01",
+    "creation_account_date": "2016-09-09",
+    "user_id": "731b0e35-64ce-4de2-8746-47ac3fe9ee8b"
   }
 ]
