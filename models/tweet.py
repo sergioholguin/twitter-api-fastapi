@@ -14,13 +14,23 @@ class TweetBase(BaseModel):
     content: str = Field(..., min_length=0, max_length=280)
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
-    by: User = Field(...)
 
 
 class NewTweet(TweetBase):
     by: str = Field(..., min_length=36, max_length=36)
 
 
-class Tweet(TweetBase):
+class TweetID(BaseModel):
     tweet_id: UUID = Field(default_factory=uuid4)
 
+
+class Tweet(TweetBase, TweetID):
+    by: User = Field(...)
+
+
+class TweetDeleted(TweetID):
+    delete_message: str = Field(default="Tweet has been deleted!")
+
+
+class UpdateTweet(TweetBase):
+    pass

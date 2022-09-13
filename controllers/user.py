@@ -198,7 +198,7 @@ def delete_user(
         users = json.loads(content)
 
         try:
-            # Searched new user
+            # Searched user
             searched_user = [user for user in users if user["user_id"] == user_id][0]
 
             # Response
@@ -272,7 +272,7 @@ def update_user(
         content = f.read()
         users = json.loads(content)
 
-        # Searched new user
+        # Searched user
         try:
             searched_user = [user for user in users if user["user_id"] == user_id][0]
 

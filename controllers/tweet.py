@@ -1,5 +1,6 @@
 # Python
 import json
+from datetime import datetime
 from typing import List
 from uuid import uuid4
 
@@ -9,7 +10,7 @@ from fastapi import status, HTTPException
 from fastapi import Path, Body
 
 # Models
-from models import Tweet, NewTweet
+from models import Tweet, NewTweet, TweetDeleted, UpdateTweet
 
 # Tags
 from .tags import Tags
@@ -32,6 +33,8 @@ router = APIRouter(tags=[Tags.tweets])
 )
 def home():
     """
+    Home
+
     This path operation show all tweets in the app
 
     No-Parameters
@@ -66,7 +69,7 @@ def post_tweet(tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info)):
 
     Parameters:
     - Request Body parameters:
-        - **tweet: Tweet**
+        - **tweet: NewTweet**
 
     Returns a json with the basic tweet information:
     - tweet_id: UUID
@@ -116,19 +119,103 @@ def post_tweet(tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info)):
     status_code=status.HTTP_200_OK,
     summary='Show a specific tweet'
 )
-def show_tweet():
-    pass
+def show_tweet(
+        tweet_id: str = Path(
+            ...,
+            min_length=36,
+            max_length=36,
+            title="Tweet ID",
+            description="This is UUID4 that identifies a tweet.",
+            examples=TweetExamples.tweet_id
+        )
+):
+    """
+    Show Tweet
+
+    This path operation show a specific tweet in the app
+
+    Parameters:
+    - Path Parameters:
+        - **tweet_id: str**
+
+    Returns a json list with the tweet info with the following keys:
+    - tweet_id: UUID
+    - content: str
+    - created_at: datetime
+    - updated_at: Optional[datetime]
+    - by: User
+    """
+
+    with open("tweets.json", "r", encoding="utf-8") as f:
+        content = f.read()
+        tweets = json.loads(content)
+        searched_tweet = [tweet for tweet in tweets if tweet["tweet_id"] == tweet_id][0]
+
+        return searched_tweet
 
 
 ## Delete a tweet
 @router.delete(
     path="/tweets/{tweet_id}/delete",
-    response_model=Tweet,
+    response_model=TweetDeleted,
     status_code=status.HTTP_200_OK,
     summary='Delete a specific tweet'
 )
-def delete_tweet():
-    pass
+def delete_tweet(
+        tweet_id: str = Path(
+            ...,
+            min_length=36,
+            max_length=36,
+            title="Tweet ID",
+            description="This is UUID4 that identifies a tweet.",
+            examples=TweetExamples.tweet_id
+        )
+):
+    """
+    Delete Tweet
+
+    This path operation delete a specific tweet in the app
+
+    Parameters:
+    - Path Parameters:
+        - **tweet_id: str**
+
+    Returns a json list with the tweet info with the following keys:
+    - tweet_id: UUID
+    - delete_message: str
+    """
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        content = f.read()
+        tweets = json.loads(content)
+
+        try:
+            # Searched tweet
+            searched_tweet = [tweet for tweet in tweets if tweet["tweet_id"] == tweet_id][0]
+
+            # Response
+            response = {
+                "tweet_id": searched_tweet["tweet_id"],
+                "delete_message": f'Tweet written by {searched_tweet["by"]["first_name"]} has been deleted!'
+            }
+
+            # Remove the specific tweet
+            tweets.remove(searched_tweet)
+
+            # Move to the first line of the file
+            f.seek(0)
+
+            # Writing the new user list
+            json_tweet_list = json.dumps(tweets)
+            f.write(json_tweet_list)
+            f.truncate()
+
+            return response
+
+        except IndexError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="This tweet doesn't exist!"
+            )
 
 
 ## Update a tweet
@@ -138,5 +225,68 @@ def delete_tweet():
     status_code=status.HTTP_200_OK,
     summary='Update a specific tweet'
 )
-def update_tweet():
-    pass
+def update_tweet(
+        tweet_id: str = Path(
+            ...,
+            min_length=36,
+            max_length=36,
+            title="Tweet ID",
+            description="This is UUID4 that identifies a tweet.",
+            examples=TweetExamples.tweet_id
+        ),
+        new_tweet_info: UpdateTweet = Body(..., examples=TweetExamples.tweet_updates)
+):
+    """
+    Update Tweet
+
+    This path operation update a specific tweet in the app
+
+    Parameters:
+    - Path Parameters:
+        - **tweet_id: str**
+
+    - Request Body parameters:
+        - **new_tweet_info: UpdateTweet**
+
+    Returns a json with the basic tweet information:
+    - tweet_id: UUID
+    - content: str
+    - created_at: datetime
+    - updated_at: datetime
+    - by: User
+    """
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        content = f.read()
+        tweets = json.loads(content)
+
+        try:
+            # Searched tweet
+            searched_tweet = [tweet for tweet in tweets if tweet["tweet_id"] == tweet_id][0]
+
+            # New Tweet info
+            updated_tweet = new_tweet_info.dict()
+            updated_tweet["tweet_id"] = searched_tweet["tweet_id"]
+            updated_tweet["created_at"] = searched_tweet["created_at"]
+            updated_tweet["updated_at"] = str(datetime.now())
+            updated_tweet["by"] = searched_tweet["by"]
+
+            # Replace tweet
+            index = tweets.index(searched_tweet)
+            tweets[index] = updated_tweet
+
+            # Move to the first line of the file
+            f.seek(0)
+
+            # Writing the new user list
+            json_tweet_list = json.dumps(tweets)
+            f.write(json_tweet_list)
+            f.truncate()
+
+            return updated_tweet
+
+        except IndexError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="This tweet doesn't exist!"
+            )
+

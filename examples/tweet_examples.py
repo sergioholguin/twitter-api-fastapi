@@ -26,7 +26,39 @@ tweet_info_examples = {
 }
 
 tweet_id_examples = {
+    "example-1": {
+        "summary": "First Example",
+        "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "example-2": {
+        "summary": "Second Example",
+        "value": "6c69519b-12d7-4309-bca2-9685cd36413c",
+    },
+    "example-3": {
+        "summary": "Third Example",
+        "value": "4861aaca-d9cf-46e2-b347-d10ffdadd38f",
+    }
+}
 
+tweet_update_examples = {
+    "example-1": {
+        "summary": "First Example",
+        "value": {
+            "content": "Lorem Ipsum adfadf Pedrotweet",
+        }
+    },
+    "example-2": {
+        "summary": "Second Example",
+        "value": {
+            "content": "TAMASHIIIIIIIII NO IRO WAAAAAAAAAA",
+        }
+    },
+    "example-3": {
+        "summary": "Third Example",
+        "value": {
+            "content": "I want to travel to other countries y'know.",
+        }
+    }
 }
 
 
@@ -34,4 +66,5 @@ tweet_id_examples = {
 class TweetExamples(Enum):
     tweet_info = tweet_info_examples
     tweet_id = tweet_id_examples
+    tweet_updates = tweet_update_examples
 
