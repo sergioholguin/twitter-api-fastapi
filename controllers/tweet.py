@@ -1,6 +1,7 @@
 # Python
 import json
 from typing import List
+from uuid import uuid4
 
 # FastAPI
 from fastapi import APIRouter
@@ -8,12 +9,13 @@ from fastapi import status, HTTPException
 from fastapi import Path, Body
 
 # Models
-from models import Tweet
+from models import Tweet, NewTweet
 
 # Tags
 from .tags import Tags
 
 # Examples
+from examples import TweetExamples
 
 
 router = APIRouter(tags=[Tags.tweets])
@@ -56,7 +58,7 @@ def home():
     status_code=status.HTTP_201_CREATED,
     summary='Post a tweet'
 )
-def post_tweet(tweet: Tweet = Body(...)):
+def post_tweet(tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info)):
     """
     Post Tweet
 
@@ -76,31 +78,35 @@ def post_tweet(tweet: Tweet = Body(...)):
     with open("tweets.json", "r+", encoding="utf-8") as f:
         # Reading tweets.json and convert it to a dict
         content = f.read()
-        results = json.loads(content)
+        tweets = json.loads(content)
 
         # Receive new tweet
         tweet_dict = tweet.dict()
-        tweet_dict["tweet_id"] = str(tweet_dict["tweet_id"])
+        tweet_dict["tweet_id"] = str(uuid4())
         tweet_dict["created_at"] = str(tweet_dict["created_at"])
 
         if tweet_dict["updated_at"]:
             tweet_dict["updated_at"] = str(tweet_dict["updated_at"])
 
-        tweet_dict["by"]["user_id"] = str(tweet_dict["by"]["user_id"])
-        tweet_dict["by"]["birth_date"] = str(tweet_dict["by"]["birth_date"])
-        tweet_dict["by"]["creation_account_date"] = str(tweet_dict["by"]["creation_account_date"])
+        user_id = tweet_dict["by"]
 
-        # Add new tweet to tweet.json
-        results.append(tweet_dict)
+        with open("users.json", "r", encoding="utf-8") as file:
+            users = json.loads(file.read())
+            searched_user = [user for user in users if user["user_id"] == user_id][0]
+            tweet_dict["by"] = searched_user
+
+        # Add new tweet to tweets.json
+        tweets.append(tweet_dict)
 
         # Move to the first line of the file
         f.seek(0)
 
         # Writing the new tweet list
-        json_tweet_list = json.dumps(results)
+        json_tweet_list = json.dumps(tweets)
         f.write(json_tweet_list)
+        f.truncate()
 
-        return tweet
+        return tweet_dict
 
 
 ## Show a tweet

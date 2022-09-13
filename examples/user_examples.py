@@ -2,7 +2,7 @@ from enum import Enum
 
 
 # User Path Operation Examples
-signup_examples = {
+user_info_examples = {
     "example-1": {
         "summary": "First Example",
         "value": {
@@ -42,7 +42,7 @@ signup_examples = {
 }
 
 
-id_examples = {
+user_id_examples = {
     "example-1": {
         "summary": "First Example",
         "value": "731b0e35-64ce-4de2-8746-47ac3fe9ee8b"
@@ -60,5 +60,5 @@ id_examples = {
 
 # Enum
 class UserExamples(Enum):
-    user_info = signup_examples
-    user_id = id_examples
+    user_info = user_info_examples
+    user_id = user_id_examples

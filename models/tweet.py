@@ -11,12 +11,16 @@ from models import User
 
 
 class TweetBase(BaseModel):
-    tweet_id: UUID = Field(default_factory=uuid4)
     content: str = Field(..., min_length=0, max_length=280)
     created_at: datetime = Field(default=datetime.now())
-    updated_at: Optional[datetime] = Field(default=None)
+    updated_at: datetime = Field(default=datetime.now())
     by: User = Field(...)
 
 
+class NewTweet(TweetBase):
+    by: str = Field(..., min_length=36, max_length=36)
+
+
 class Tweet(TweetBase):
-    pass
+    tweet_id: UUID = Field(default_factory=uuid4)
+

@@ -69,6 +69,7 @@ def signup(user: UserRegister = Body(..., examples=UserExamples.user_info)):
         # Writing the new user list
         json_user_list = json.dumps(results)
         f.write(json_user_list)
+        f.truncate()
 
         return user_dict
 

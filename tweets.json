@@ -11,7 +11,7 @@
       "last_name": "string",
       "country": "string",
       "birth_date": "2021-09-08",
-      "creation_date": "2021-09-08"
+      "creation_account_date": "2021-09-08"
     }
   },
   {
@@ -26,7 +26,39 @@
       "last_name": "string",
       "country": "string",
       "birth_date": "2020-09-08",
-      "creation_date": "2020-09-08"
+      "creation_account_date": "2020-09-08"
     }
+  },
+  {
+    "content": "Pedrotweet",
+    "created_at": "2022-09-12 19:04:33.216967",
+    "updated_at": "2022-09-12 19:04:33.216967",
+    "by": {
+      "password": "thisisanotherpassword",
+      "email": "fer@example.com",
+      "first_name": "Fernandino",
+      "last_name": "SomeLastName",
+      "country": "Island",
+      "birth_date": "2000-01-01",
+      "creation_account_date": "2010-09-09",
+      "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "tweet_id": "4861aaca-d9cf-46e2-b347-d10ffdadd38f"
+  },
+  {
+    "content": "Island is the best story I've read so far",
+    "created_at": "2022-09-12 19:07:40.218342",
+    "updated_at": "2022-09-12 19:07:40.218356",
+    "by": {
+      "password": "thisisthesergiopassword",
+      "email": "sergio@example.com",
+      "first_name": "Sergio",
+      "last_name": "SomeLastName",
+      "country": "Peru",
+      "birth_date": "2003-01-01",
+      "creation_account_date": "2013-09-09",
+      "user_id": "f097222b-ae18-4739-bf68-f6b57635849a"
+    },
+    "tweet_id": "6c69519b-12d7-4309-bca2-9685cd36413c"
   }
 ]
