@@ -1,0 +1,52 @@
+[
+  {
+    "password": "thisisanotherpassword",
+    "email": "fer@example.com",
+    "first_name": "Fernandino",
+    "last_name": "SomeLastName",
+    "country": "Island",
+    "birth_date": "2000-01-01",
+    "creation_account_date": "2010-09-09",
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  },
+  {
+    "password": "holaquetal",
+    "user_id": "3fa85f64-5717-4562-b3fc-2c973f66afa4",
+    "email": "user@example.com",
+    "first_name": "azucena",
+    "last_name": "holguin",
+    "country": "string",
+    "birth_date": "2001-09-08",
+    "creation_account_date": "2001-09-08"
+  },
+  {
+    "password": "thisisthepedropassword",
+    "email": "pedro@example.com",
+    "first_name": "Pedro",
+    "last_name": "SomeLastName",
+    "country": "Peru",
+    "birth_date": "2000-01-01",
+    "creation_account_date": "2010-09-09",
+    "user_id": "7885a1d2-6430-48b1-a4d8-bd7346f3bdfa"
+  },
+  {
+    "password": "thisisthesergiopassword",
+    "email": "sergio@example.com",
+    "first_name": "Sergio",
+    "last_name": "SomeLastName",
+    "country": "Peru",
+    "birth_date": "2003-01-01",
+    "creation_account_date": "2013-09-09",
+    "user_id": "f097222b-ae18-4739-bf68-f6b57635849a"
+  },
+  {
+    "password": "thisisthepedropassword",
+    "email": "pedro@example.com",
+    "first_name": "Pedro",
+    "last_name": "SomeLastName",
+    "country": "Colombia",
+    "birth_date": "2000-01-01",
+    "creation_account_date": "2010-09-09",
+    "user_id": "731b0e35-64ce-4de2-8746-47ac3fe9ee8b"
+  }
+]
