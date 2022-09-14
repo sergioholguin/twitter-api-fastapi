@@ -1,0 +1,6 @@
+﻿"password","email","first_name","last_name","country","birth_date","creation_account_date","user_id"
+"thisisanotherpassword","fer@example.com","Fernandino","SomeLastName","Island","2000-01-01","2010-09-09","3fa85f64-5717-4562-b3fc-2c963f66afa6"
+"holaquetal","user@example.com","azucena","holguin","string","2001-09-08","2001-09-08","3fa85f64-5717-4562-b3fc-2c973f66afa4"
+"thisisthepedropassword","pedro@example.com","Pedro","SomeLastName","Peru","2000-01-01","2010-09-09","7885a1d2-6430-48b1-a4d8-bd7346f3bdfa"
+"thisisthesergiopassword","sergio@example.com","Sergio","SomeLastName","Peru","2003-01-01","2013-09-09","f097222b-ae18-4739-bf68-f6b57635849a"
+"thisisthepedropassword","pedro@example.com","Pedro","SomeLastName","Colombia","2000-01-01","2010-09-09","731b0e35-64ce-4de2-8746-47ac3fe9ee8b"
