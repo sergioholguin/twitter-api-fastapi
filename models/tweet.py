@@ -27,6 +27,9 @@ class TweetID(BaseModel):
 class Tweet(TweetBase, TweetID):
     by: User = Field(...)
 
+    class Config:
+        orm_mode = True
+
 
 class TweetDeleted(TweetID):
     delete_message: str = Field(default="Tweet has been deleted!")

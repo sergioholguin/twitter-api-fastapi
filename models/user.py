@@ -44,7 +44,8 @@ class UserInfo(UserBase):
 
 
 class User(UserInfo, UserID):
-    pass
+    class Config:
+        orm_mode = True
 
 
 class UserRegister(UserInfo, Password):

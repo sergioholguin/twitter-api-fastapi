@@ -4,12 +4,17 @@ from typing import List
 from uuid import uuid4
 
 # FastAPI
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import status, HTTPException
 from fastapi import Path, Body
 
 # Models
 from models import User, UserRegister, UserDeleted
+
+# Database
+from sqlalchemy.orm import Session
+from sql_app import crud, sqlalchemy_models as sql_models
+from sql_app.database import SessionLocal, mysql_engine as engine
 
 # Tags
 from .tags import Tags
@@ -18,7 +23,26 @@ from .tags import Tags
 from examples import UserExamples
 
 
+sql_models.Base.metadata.create_all(engine)
+
 router = APIRouter(tags=[Tags.users])
+
+
+# Dependencies
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# Path Operation DatabaseTest
+@router.post("/data", response_model=List[User])
+def read_data(db: Session = Depends(get_db)):
+    users = crud.get_users(db)
+    print(users)
+    return users
 
 
 # Users Path Operations
