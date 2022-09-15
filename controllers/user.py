@@ -147,7 +147,8 @@ def show_user(
             title="User ID",
             description="This is UUID4 that identifies a person.",
             examples=UserExamples.user_id
-        )
+        ),
+        db: Session = Depends(get_db)
 ):
     """
     Show User
@@ -168,12 +169,11 @@ def show_user(
     - creation_account_date: PastDate
     """
 
-    with open("users.json", "r", encoding="utf-8") as f:
-        content = f.read()
-        users = json.loads(content)
-        searched_user = [user for user in users if user["user_id"] == user_id][0]
+    user = crud.get_user_by_id(db, user_id)
 
-        return searched_user
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found!")
+    return user
 
 
 ## Delete a user
