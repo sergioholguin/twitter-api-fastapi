@@ -14,7 +14,10 @@ from models import User, UserRegister, UserDeleted
 # Database
 from sqlalchemy.orm import Session
 from sql_app import crud, sqlalchemy_models as sql_models
-from sql_app.database import SessionLocal, mysql_engine as engine
+from sql_app.database import mysql_engine as engine
+
+# Dependencies
+from .dependencies import get_db
 
 # Tags
 from .tags import Tags
@@ -22,19 +25,10 @@ from .tags import Tags
 # Examples
 from examples import UserExamples
 
-
+# Create database tables
 sql_models.Base.metadata.create_all(engine)
 
 router = APIRouter(tags=[Tags.users])
-
-
-# Dependencies
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # Path Operation DatabaseTest
