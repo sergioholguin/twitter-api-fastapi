@@ -32,11 +32,11 @@ router = APIRouter(tags=[Tags.users])
 
 
 # Path Operation DatabaseTest
-@router.post("/data", response_model=List[User])
-def read_data(db: Session = Depends(get_db)):
-    users = crud.get_users(db)
-    print(users)
-    return users
+# @router.post("/data", response_model=List[User])
+# def read_data(db: Session = Depends(get_db)):
+#     users = crud.get_users(db)
+#     print(users)
+#     return users
 
 
 # Users Path Operations
@@ -110,7 +110,7 @@ def login():
     status_code=status.HTTP_200_OK,
     summary='Show all users'
 )
-def show_all_users():
+def show_all_users(db: Session = Depends(get_db)):
     """
     Show all users
 
@@ -128,11 +128,8 @@ def show_all_users():
     - creation_account_date: PastDate
     """
 
-    with open("users.json", "r", encoding="utf-8") as f:
-        content = f.read()
-        results = json.loads(content)
-
-        return results
+    users = crud.get_users(db)
+    return users
 
 
 ## Show a user
