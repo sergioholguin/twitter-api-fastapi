@@ -8,7 +8,7 @@ from .database import Base
 
 
 # Classes
-class User(Base):
+class UserDB(Base):
     __tablename__ = "users"
 
     # Attributes
@@ -21,10 +21,10 @@ class User(Base):
     country = Column(VARCHAR(20), default=None)
     creation_account_date = Column(DATE)
 
-    tweets = relationship("Tweet", back_populates="user")
+    tweets = relationship("TweetDB", back_populates="user")
 
 
-class Tweet(Base):
+class TweetDB(Base):
     __tablename__ = "tweets"
 
     # Attributes
@@ -34,4 +34,4 @@ class Tweet(Base):
     updated_at = Column(DATE)
     user_id = Column(VARCHAR(50), ForeignKey("users.user_id"))
 
-    user = relationship("User", back_populates="tweets")
+    user = relationship("UserDB", back_populates="tweets")
