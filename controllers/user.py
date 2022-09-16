@@ -66,17 +66,6 @@ def signup(user: UserRegister = Body(..., examples=UserExamples.user_info), db: 
     return new_user
 
 
-## Login a user
-@router.post(
-    path="/login",
-    response_model=User,
-    status_code=status.HTTP_200_OK,
-    summary='Login a User'
-)
-def login():
-    pass
-
-
 ## Show all users
 @router.get(
     path="/users",

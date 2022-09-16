@@ -5,3 +5,4 @@ from enum import Enum
 class Tags(Enum):
     users = 'users'
     tweets = 'tweets'
+    auth = 'auth'
