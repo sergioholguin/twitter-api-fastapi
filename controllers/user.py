@@ -1,15 +1,21 @@
 # Python
-import json
 from typing import List
-from uuid import uuid4
 
 # FastAPI
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import status, HTTPException
 from fastapi import Path, Body
 
 # Models
 from models import User, UserRegister, UserDeleted
+
+# Database
+from sqlalchemy.orm import Session
+from sql_app import crud, sqlalchemy_models as sql_models
+from sql_app.database import mysql_engine as engine
+
+# Dependencies
+from .dependencies import get_db
 
 # Tags
 from .tags import Tags
@@ -17,6 +23,8 @@ from .tags import Tags
 # Examples
 from examples import UserExamples
 
+# Create database tables
+sql_models.Base.metadata.create_all(engine)
 
 router = APIRouter(tags=[Tags.users])
 
@@ -30,7 +38,7 @@ router = APIRouter(tags=[Tags.users])
     status_code=status.HTTP_201_CREATED,
     summary='Register a User'
 )
-def signup(user: UserRegister = Body(..., examples=UserExamples.user_info)):
+def signup(user: UserRegister = Body(..., examples=UserExamples.user_info), db: Session = Depends(get_db)):
     """
     SignUp
 
@@ -49,29 +57,13 @@ def signup(user: UserRegister = Body(..., examples=UserExamples.user_info)):
     - birthday: Optional[PastDate]
     - creation_account_date: PastDate
     """
-    with open('users.json', "r+", encoding="utf-8") as f:
-        # Reading users.json and convert it to a dict
-        content = f.read()
-        results = json.loads(content)
 
-        # Receive new user
-        user_dict = user.dict()
-        user_dict["user_id"] = str(uuid4())
-        user_dict["birth_date"] = str(user_dict["birth_date"])
-        user_dict["creation_account_date"] = str(user_dict["creation_account_date"])
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
-        # Add new user to user.json
-        results.append(user_dict)
-
-        # Move to the first line of the file
-        f.seek(0)
-
-        # Writing the new user list
-        json_user_list = json.dumps(results)
-        f.write(json_user_list)
-        f.truncate()
-
-        return user_dict
+    new_user = crud.create_user(db, user)
+    return new_user
 
 
 ## Login a user
@@ -92,7 +84,7 @@ def login():
     status_code=status.HTTP_200_OK,
     summary='Show all users'
 )
-def show_all_users():
+def show_all_users(db: Session = Depends(get_db)):
     """
     Show all users
 
@@ -110,11 +102,8 @@ def show_all_users():
     - creation_account_date: PastDate
     """
 
-    with open("users.json", "r", encoding="utf-8") as f:
-        content = f.read()
-        results = json.loads(content)
-
-        return results
+    db_users = crud.get_users(db)
+    return db_users
 
 
 ## Show a user
@@ -132,7 +121,8 @@ def show_user(
             title="User ID",
             description="This is UUID4 that identifies a person.",
             examples=UserExamples.user_id
-        )
+        ),
+        db: Session = Depends(get_db)
 ):
     """
     Show User
@@ -153,12 +143,11 @@ def show_user(
     - creation_account_date: PastDate
     """
 
-    with open("users.json", "r", encoding="utf-8") as f:
-        content = f.read()
-        users = json.loads(content)
-        searched_user = [user for user in users if user["user_id"] == user_id][0]
+    db_user = crud.get_user_by_id(db, user_id)
 
-        return searched_user
+    if db_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found!")
+    return db_user
 
 
 ## Delete a user
@@ -176,7 +165,8 @@ def delete_user(
             title="User ID",
             description="This is UUID4 that identifies a person.",
             examples=UserExamples.user_id
-        )
+        ),
+        db: Session = Depends(get_db)
 ):
     """
     Delete User
@@ -193,39 +183,13 @@ def delete_user(
     - delete_message: str
     """
 
-    with open("users.json", "r+", encoding="utf-8") as f:
-        content = f.read()
-        users = json.loads(content)
+    db_user = crud.get_user_by_id(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User doesn't exist!")
 
-        try:
-            # Searched user
-            searched_user = [user for user in users if user["user_id"] == user_id][0]
+    deleted_response = crud.delete_user(db, user_id)
 
-            # Response
-            response = {
-                "user_id": searched_user["user_id"],
-                "email": searched_user["email"],
-                "delete_message": f'{searched_user["first_name"]} has been deleted!'
-            }
-
-            # Remove the specific user
-            users.remove(searched_user)
-
-            # Move to the first line of the file
-            f.seek(0)
-
-            # Writing the new user list
-            json_user_list = json.dumps(users)
-            f.write(json_user_list)
-            f.truncate()
-
-            return response
-
-        except IndexError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="This person doesn't exist!"
-            )
+    return deleted_response
 
 
 ## Update a user
@@ -244,7 +208,8 @@ def update_user(
             description="This is UUID4 that identifies a person.",
             examples=UserExamples.user_id
         ),
-        new_user_info: UserRegister = Body(..., examples=UserExamples.user_info)
+        new_user_info: UserRegister = Body(..., examples=UserExamples.user_info),
+        db: Session = Depends(get_db)
 ):
     """
     Update User
@@ -267,37 +232,11 @@ def update_user(
     - birthday: Optional[PastDate]
     - creation_account_date: PastDate
     """
-    with open('users.json', "r+", encoding="utf-8") as f:
-        # Reading users.json and convert it to a dict
-        content = f.read()
-        users = json.loads(content)
 
-        # Searched user
-        try:
-            searched_user = [user for user in users if user["user_id"] == user_id][0]
+    db_user = crud.get_user_by_id(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User doesn't exist!")
 
-            # New user info
-            updated_user = new_user_info.dict()
-            updated_user["user_id"] = searched_user["user_id"]
-            updated_user["birth_date"] = str(updated_user["birth_date"])
-            updated_user["creation_account_date"] = str(updated_user["creation_account_date"])
+    updated_user = crud.update_user(db, user_id, new_user_info)
 
-            # Replace user info
-            index = users.index(searched_user)
-            users[index] = updated_user
-
-            # Move to the first line of the file
-            f.seek(0)
-
-            # Writing the new user list
-            json_user_list = json.dumps(users)
-            f.write(json_user_list)
-            f.truncate()
-
-            return updated_user
-
-        except IndexError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="This person doesn't exist!"
-            )
+    return updated_user

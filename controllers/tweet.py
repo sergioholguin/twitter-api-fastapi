@@ -1,16 +1,22 @@
 # Python
-import json
 from datetime import datetime
 from typing import List
-from uuid import uuid4
 
 # FastAPI
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import status, HTTPException
 from fastapi import Path, Body
 
 # Models
 from models import Tweet, NewTweet, TweetDeleted, UpdateTweet
+
+# Database
+from sqlalchemy.orm import Session
+from sql_app import crud, sqlalchemy_models as sql_models
+from sql_app.database import mysql_engine as engine
+
+# Dependencies
+from .dependencies import get_db
 
 # Tags
 from .tags import Tags
@@ -18,6 +24,8 @@ from .tags import Tags
 # Examples
 from examples import TweetExamples
 
+# Create database tables
+sql_models.Base.metadata.create_all(engine)
 
 router = APIRouter(tags=[Tags.tweets])
 
@@ -31,7 +39,7 @@ router = APIRouter(tags=[Tags.tweets])
     status_code=status.HTTP_200_OK,
     summary="Show all tweets"
 )
-def home():
+def home(db: Session = Depends(get_db)):
     """
     Home
 
@@ -47,11 +55,8 @@ def home():
     - by: User
     """
 
-    with open("tweets.json", "r", encoding="utf-8") as f:
-        content = f.read()
-        results = json.loads(content)
-
-        return results
+    db_tweets = crud.get_tweets(db)
+    return db_tweets
 
 
 ## Post a tweet
@@ -61,7 +66,10 @@ def home():
     status_code=status.HTTP_201_CREATED,
     summary='Post a tweet'
 )
-def post_tweet(tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info)):
+def post_tweet(
+        tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info),
+        db: Session = Depends(get_db)
+):
     """
     Post Tweet
 
@@ -78,38 +86,9 @@ def post_tweet(tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info)):
     - updated_at: Optional[datetime]
     - by: User
     """
-    with open("tweets.json", "r+", encoding="utf-8") as f:
-        # Reading tweets.json and convert it to a dict
-        content = f.read()
-        tweets = json.loads(content)
 
-        # Receive new tweet
-        tweet_dict = tweet.dict()
-        tweet_dict["tweet_id"] = str(uuid4())
-        tweet_dict["created_at"] = str(tweet_dict["created_at"])
-
-        if tweet_dict["updated_at"]:
-            tweet_dict["updated_at"] = str(tweet_dict["updated_at"])
-
-        user_id = tweet_dict["by"]
-
-        with open("users.json", "r", encoding="utf-8") as file:
-            users = json.loads(file.read())
-            searched_user = [user for user in users if user["user_id"] == user_id][0]
-            tweet_dict["by"] = searched_user
-
-        # Add new tweet to tweets.json
-        tweets.append(tweet_dict)
-
-        # Move to the first line of the file
-        f.seek(0)
-
-        # Writing the new tweet list
-        json_tweet_list = json.dumps(tweets)
-        f.write(json_tweet_list)
-        f.truncate()
-
-        return tweet_dict
+    db_tweet = crud.create_tweet(db, tweet)
+    return db_tweet
 
 
 ## Show a tweet
@@ -127,7 +106,8 @@ def show_tweet(
             title="Tweet ID",
             description="This is UUID4 that identifies a tweet.",
             examples=TweetExamples.tweet_id
-        )
+        ),
+        db: Session = Depends(get_db)
 ):
     """
     Show Tweet
@@ -146,12 +126,11 @@ def show_tweet(
     - by: User
     """
 
-    with open("tweets.json", "r", encoding="utf-8") as f:
-        content = f.read()
-        tweets = json.loads(content)
-        searched_tweet = [tweet for tweet in tweets if tweet["tweet_id"] == tweet_id][0]
+    db_tweet = crud.get_tweet_by_id(db, tweet_id)
 
-        return searched_tweet
+    if tweet_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tweet not found!")
+    return db_tweet
 
 
 ## Delete a tweet
@@ -169,7 +148,8 @@ def delete_tweet(
             title="Tweet ID",
             description="This is UUID4 that identifies a tweet.",
             examples=TweetExamples.tweet_id
-        )
+        ),
+        db: Session = Depends(get_db)
 ):
     """
     Delete Tweet
@@ -184,38 +164,14 @@ def delete_tweet(
     - tweet_id: UUID
     - delete_message: str
     """
-    with open("tweets.json", "r+", encoding="utf-8") as f:
-        content = f.read()
-        tweets = json.loads(content)
 
-        try:
-            # Searched tweet
-            searched_tweet = [tweet for tweet in tweets if tweet["tweet_id"] == tweet_id][0]
+    db_tweet = crud.get_tweet_by_id(db, tweet_id=tweet_id)
+    if db_tweet is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tweet doesn't exist!")
 
-            # Response
-            response = {
-                "tweet_id": searched_tweet["tweet_id"],
-                "delete_message": f'Tweet written by {searched_tweet["by"]["first_name"]} has been deleted!'
-            }
+    deleted_response = crud.delete_tweet(db, tweet_id)
 
-            # Remove the specific tweet
-            tweets.remove(searched_tweet)
-
-            # Move to the first line of the file
-            f.seek(0)
-
-            # Writing the new user list
-            json_tweet_list = json.dumps(tweets)
-            f.write(json_tweet_list)
-            f.truncate()
-
-            return response
-
-        except IndexError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="This tweet doesn't exist!"
-            )
+    return deleted_response
 
 
 ## Update a tweet
@@ -234,7 +190,8 @@ def update_tweet(
             description="This is UUID4 that identifies a tweet.",
             examples=TweetExamples.tweet_id
         ),
-        new_tweet_info: UpdateTweet = Body(..., examples=TweetExamples.tweet_updates)
+        new_tweet_info: UpdateTweet = Body(..., examples=TweetExamples.tweet_updates),
+        db: Session = Depends(get_db)
 ):
     """
     Update Tweet
@@ -255,38 +212,11 @@ def update_tweet(
     - updated_at: datetime
     - by: User
     """
-    with open("tweets.json", "r+", encoding="utf-8") as f:
-        content = f.read()
-        tweets = json.loads(content)
 
-        try:
-            # Searched tweet
-            searched_tweet = [tweet for tweet in tweets if tweet["tweet_id"] == tweet_id][0]
+    db_tweet = crud.get_tweet_by_id(db, tweet_id=tweet_id)
+    if db_tweet is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tweet doesn't exist!")
 
-            # New Tweet info
-            updated_tweet = new_tweet_info.dict()
-            updated_tweet["tweet_id"] = searched_tweet["tweet_id"]
-            updated_tweet["created_at"] = searched_tweet["created_at"]
-            updated_tweet["updated_at"] = str(datetime.now())
-            updated_tweet["by"] = searched_tweet["by"]
+    updated_tweet = crud.update_tweet(db, tweet_id, new_tweet_info)
 
-            # Replace tweet
-            index = tweets.index(searched_tweet)
-            tweets[index] = updated_tweet
-
-            # Move to the first line of the file
-            f.seek(0)
-
-            # Writing the new user list
-            json_tweet_list = json.dumps(tweets)
-            f.write(json_tweet_list)
-            f.truncate()
-
-            return updated_tweet
-
-        except IndexError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="This tweet doesn't exist!"
-            )
-
+    return updated_tweet
