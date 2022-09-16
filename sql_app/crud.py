@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from .sqlalchemy_models import UserDB, TweetDB
 
 # Pydantic Models
-from models import User, UserRegister, UserDeleted
-from models import Tweet, NewTweet, TweetDeleted, UpdateTweet
+from models import User, UserRegister
+from models import Tweet, NewTweet, UpdateTweet
 
 
 # User Functions
@@ -55,7 +55,7 @@ def delete_user(db: Session, user_id: str):
 
     response = {
         "user_id": user_to_delete.user_id,
-        "delete_message": f'{user_to_delete.first_name} has been deleted succesfully!'
+        "delete_message": f'{user_to_delete.first_name} has been deleted successfully!'
     }
 
     return response
@@ -75,3 +75,50 @@ def update_user(db: Session, user_id: str, new_user_info: UserRegister):
 ## Read
 def get_tweets(db: Session):
     return db.query(TweetDB).all()
+
+
+def get_tweet_by_id(db: Session, tweet_id: str):
+    return db.query(TweetDB).filter(TweetDB.tweet_id == tweet_id).first()
+
+
+## Create
+def create_tweet(db: Session, tweet: NewTweet):
+    db_tweet = TweetDB(
+        tweet_id=uuid4(),
+        content=tweet.content,
+        created_at=tweet.created_at,
+        updated_at=tweet.updated_at,
+        user_id=tweet.user_id
+    )
+
+    db.add(db_tweet)  # Add the new instance
+    db.commit()  # Commit the changes to the database
+    # Refresh the instance (so that it contains new data from the database, like the generated ID)
+    db.refresh(db_tweet)
+
+    return db_tweet
+
+
+## Delete
+def delete_tweet(db: Session, tweet_id: str):
+    tweet_to_delete = get_tweet_by_id(db, tweet_id)
+    user = tweet_to_delete.user
+    db.delete(tweet_to_delete)
+    db.commit()
+
+    response = {
+        "tweet_id": tweet_to_delete.tweet_id,
+        "delete_message": f'Tweet written by {user.first_name} has been deleted successfully!'
+    }
+
+    return response
+
+
+## Update
+def update_tweet(db: Session, tweet_id: str, new_tweet_info: UpdateTweet):
+    new_tweet_info = new_tweet_info.dict()
+    db.query(TweetDB).filter(TweetDB.tweet_id == tweet_id).update(new_tweet_info)
+    db.commit()
+
+    return get_tweet_by_id(db, tweet_id=tweet_id)
+
