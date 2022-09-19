@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 # FastAPI
-from fastapi import APIRouter, status, Body, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 # Tags
