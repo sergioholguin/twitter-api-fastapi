@@ -8,8 +8,11 @@ from sqlalchemy.orm import Session
 from .sqlalchemy_models import UserDB, TweetDB
 
 # Pydantic Models
-from models import User, UserRegister
-from models import Tweet, NewTweet, UpdateTweet
+from models import UserRegister, User
+from models import NewTweet, UpdateTweet
+
+# Hashing
+from .hashing import get_password_hash
 
 
 # User Functions
@@ -28,12 +31,14 @@ def get_users(db: Session):
 
 ## Create
 def create_user(db: Session, user: UserRegister):
+    hashed_password = get_password_hash(user.password)
+
     db_user = UserDB(
         user_id=uuid4(),
         first_name=user.first_name,
         last_name=user.last_name,
         email=user.email,
-        password=user.password,
+        password=hashed_password,
         birth_date=user.birth_date,
         country=user.country,
         creation_account_date=user.creation_account_date
@@ -50,7 +55,7 @@ def create_user(db: Session, user: UserRegister):
 ## Delete
 def delete_user(db: Session, user_id: str):
     user_to_delete = get_user_by_id(db, user_id)
-    db.delete(user_to_delete)
+    db.query(UserDB).filter(UserDB.user_id == user_id).delete()
     db.commit()
 
     response = {
@@ -63,8 +68,14 @@ def delete_user(db: Session, user_id: str):
 
 ## Update
 def update_user(db: Session, user_id: str, new_user_info: UserRegister):
-    # Updated Info
+    # Updated Hashed Password
+    hashed_password = get_password_hash(new_user_info.password)
+    new_user_info.password = hashed_password
+
+    # To Dict
     new_user_info = new_user_info.dict()
+
+    # Updating Info
     db.query(UserDB).filter(UserDB.user_id == user_id).update(new_user_info)
     db.commit()
 
@@ -75,6 +86,10 @@ def update_user(db: Session, user_id: str, new_user_info: UserRegister):
 ## Read
 def get_tweets(db: Session):
     return db.query(TweetDB).all()
+
+
+def get_user_tweets(db: Session, user: User):
+    return db.query(TweetDB).filter(TweetDB.user_id == user.user_id).all()
 
 
 def get_tweet_by_id(db: Session, tweet_id: str):
@@ -103,7 +118,8 @@ def create_tweet(db: Session, tweet: NewTweet):
 def delete_tweet(db: Session, tweet_id: str):
     tweet_to_delete = get_tweet_by_id(db, tweet_id)
     user = tweet_to_delete.user
-    db.delete(tweet_to_delete)
+
+    db.query(TweetDB).filter(TweetDB.tweet_id == tweet_id).delete()
     db.commit()
 
     response = {
@@ -121,4 +137,3 @@ def update_tweet(db: Session, tweet_id: str, new_tweet_info: UpdateTweet):
     db.commit()
 
     return get_tweet_by_id(db, tweet_id=tweet_id)
-

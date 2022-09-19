@@ -67,4 +67,3 @@ class TweetExamples(Enum):
     tweet_info = tweet_info_examples
     tweet_id = tweet_id_examples
     tweet_updates = tweet_update_examples
-

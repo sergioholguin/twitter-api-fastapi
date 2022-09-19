@@ -1,4 +1,5 @@
 # Python
+from typing import Optional
 from uuid import UUID, uuid4
 from datetime import date
 
@@ -13,7 +14,7 @@ class TweetBase(BaseModel):
 
 
 class NewTweet(TweetBase):
-    user_id: UUID = Field(...)
+    user_id: Optional[UUID] = Field(default=None)
 
 
 class TweetID(BaseModel):
