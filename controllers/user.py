@@ -15,7 +15,8 @@ from sql_app import crud, sqlalchemy_models as sql_models
 from sql_app.database import mysql_engine as engine
 
 # Dependencies
-from .dependencies import get_db
+from sql_app.dependencies import get_db
+from .oauth2 import get_current_user, auth_dependencies
 
 # Tags
 from .tags import Tags
@@ -71,7 +72,8 @@ def signup(user: UserRegister = Body(..., examples=UserExamples.user_info), db: 
     path="/users",
     response_model=List[User],
     status_code=status.HTTP_200_OK,
-    summary='Show all users'
+    summary='Show all users',
+    dependencies=auth_dependencies
 )
 def show_all_users(db: Session = Depends(get_db)):
     """
@@ -95,12 +97,43 @@ def show_all_users(db: Session = Depends(get_db)):
     return db_users
 
 
+## Show me
+@router.get(
+    path="/users/me",
+    response_model=User,
+    status_code=status.HTTP_200_OK,
+    summary='Show my information'
+)
+def show_user(
+        current_user: User = Depends(get_current_user)
+):
+    """
+    Show me
+
+    This path operation show information about the login user
+
+    No-Parameters
+
+    Returns a json with the user info with the following keys:
+    - user_id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - country: Optional[str]
+    - birthday: Optional[PastDate]
+    - creation_account_date: PastDate
+    """
+
+    return current_user
+
+
 ## Show a user
 @router.get(
     path="/users/{user_id}",
     response_model=User,
     status_code=status.HTTP_200_OK,
-    summary='Show a specific user information'
+    summary='Show a specific user information',
+    dependencies=auth_dependencies
 )
 def show_user(
         user_id: str = Path(
@@ -144,7 +177,8 @@ def show_user(
     path="/users/{user_id}/delete",
     response_model=UserDeleted,
     status_code=status.HTTP_200_OK,
-    summary='Delete a specific user account'
+    summary='Delete a specific user account',
+    dependencies=auth_dependencies
 )
 def delete_user(
         user_id: str = Path(
@@ -186,7 +220,8 @@ def delete_user(
     path="/users/{user_id}/update",
     response_model=User,
     status_code=status.HTTP_200_OK,
-    summary='Update a specific user account'
+    summary='Update a specific user account',
+    dependencies=auth_dependencies
 )
 def update_user(
         user_id: str = Path(

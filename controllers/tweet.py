@@ -1,5 +1,4 @@
 # Python
-from datetime import datetime
 from typing import List
 
 # FastAPI
@@ -8,7 +7,7 @@ from fastapi import status, HTTPException
 from fastapi import Path, Body
 
 # Models
-from models import Tweet, NewTweet, TweetDeleted, UpdateTweet
+from models import Tweet, NewTweet, TweetDeleted, UpdateTweet, User
 
 # Database
 from sqlalchemy.orm import Session
@@ -16,7 +15,8 @@ from sql_app import crud, sqlalchemy_models as sql_models
 from sql_app.database import mysql_engine as engine
 
 # Dependencies
-from .dependencies import get_db
+from sql_app.dependencies import get_db
+from .oauth2 import auth_dependencies, get_current_user
 
 # Tags
 from .tags import Tags
@@ -64,11 +64,13 @@ def home(db: Session = Depends(get_db)):
     path="/post",
     response_model=Tweet,
     status_code=status.HTTP_201_CREATED,
-    summary='Post a tweet'
+    summary='Post a tweet',
+    dependencies=auth_dependencies
 )
 def post_tweet(
         tweet: NewTweet = Body(..., examples=TweetExamples.tweet_info),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
     """
     Post Tweet
@@ -86,6 +88,8 @@ def post_tweet(
     - updated_at: Optional[datetime]
     - by: User
     """
+    if tweet.user_id is None:
+        tweet.user_id = current_user.user_id
 
     db_tweet = crud.create_tweet(db, tweet)
     return db_tweet
@@ -138,7 +142,8 @@ def show_tweet(
     path="/tweets/{tweet_id}/delete",
     response_model=TweetDeleted,
     status_code=status.HTTP_200_OK,
-    summary='Delete a specific tweet'
+    summary='Delete a specific tweet',
+    dependencies=auth_dependencies
 )
 def delete_tweet(
         tweet_id: str = Path(
@@ -179,7 +184,8 @@ def delete_tweet(
     path="/tweets/{tweet_id}/update",
     response_model=Tweet,
     status_code=status.HTTP_200_OK,
-    summary='Update a specific tweet'
+    summary='Update a specific tweet',
+    dependencies=auth_dependencies
 )
 def update_tweet(
         tweet_id: str = Path(

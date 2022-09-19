@@ -3,6 +3,7 @@ from datetime import timedelta
 
 # FastAPI
 from fastapi import APIRouter, status, Body, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 # Tags
 from .tags import Tags
@@ -16,7 +17,7 @@ from sql_app import crud, sqlalchemy_models as sql_models
 from sql_app.database import mysql_engine as engine
 
 # Dependencies
-from .dependencies import get_db
+from sql_app.dependencies import get_db
 
 # Hashing
 from sql_app.hashing import verify_password
@@ -41,9 +42,10 @@ router = APIRouter(tags=[Tags.auth])
 )
 def login(
         db: Session = Depends(get_db),
-        request: UserLogin = Body(...)
+        ## request: UserLogin = Body(...)
+        request: OAuth2PasswordRequestForm = Depends()
 ):
-    db_user = crud.get_user_by_email(db, email=request.email)
+    db_user = crud.get_user_by_email(db, email=request.username)
 
     if db_user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Credentials")
