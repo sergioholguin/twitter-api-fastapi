@@ -95,6 +95,33 @@ def post_tweet(
     return db_tweet
 
 
+## Show my tweets
+@router.get(
+    path="/tweets/me",
+    response_model=List[Tweet],
+    status_code=status.HTTP_200_OK,
+    summary="Show my tweets"
+)
+def show_my_tweets(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Show my Tweets
+
+    This path operation show my tweets in the app
+
+    No-Parameters
+
+    Returns a json list with all tweets in the app with the following keys:
+    - tweet_id: UUID
+    - content: str
+    - created_at: datetime
+    - updated_at: Optional[datetime]
+    - by: User
+    """
+
+    my_tweets = crud.get_user_tweets(db, current_user)
+    return my_tweets
+
+
 ## Show a tweet
 @router.get(
     path="/tweets/{tweet_id}",

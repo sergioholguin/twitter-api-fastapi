@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from .sqlalchemy_models import UserDB, TweetDB
 
 # Pydantic Models
-from models import UserRegister
+from models import UserRegister, User
 from models import NewTweet, UpdateTweet
 
 # Hashing
@@ -86,6 +86,10 @@ def update_user(db: Session, user_id: str, new_user_info: UserRegister):
 ## Read
 def get_tweets(db: Session):
     return db.query(TweetDB).all()
+
+
+def get_user_tweets(db: Session, user: User):
+    return db.query(TweetDB).filter(TweetDB.user_id == user.user_id).all()
 
 
 def get_tweet_by_id(db: Session, tweet_id: str):
