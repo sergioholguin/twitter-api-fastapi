@@ -1,3 +1,7 @@
+
+# Starlette
+from starlette.middleware.base import BaseHTTPMiddleware
+
 # Uvicorn
 import uvicorn
 
@@ -7,9 +11,14 @@ from fastapi import FastAPI
 # Router
 from controllers import router
 
-app = FastAPI()
+# Middleware
+from middleware import process_time_header
 
+
+# App
+app = FastAPI()
 app.include_router(router)
+app.add_middleware(BaseHTTPMiddleware, dispatch=process_time_header)
 
 
 if __name__ == '__main__':

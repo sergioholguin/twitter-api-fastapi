@@ -159,7 +159,7 @@ def show_tweet(
 
     db_tweet = crud.get_tweet_by_id(db, tweet_id)
 
-    if tweet_id is None:
+    if db_tweet is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tweet not found!")
     return db_tweet
 
