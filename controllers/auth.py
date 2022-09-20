@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from .tags import Tags
 
 # Models
-from models import UserLogin, Token
+from models import Token
 
 # Database
 from sqlalchemy.orm import Session
@@ -60,6 +60,3 @@ def login(
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-

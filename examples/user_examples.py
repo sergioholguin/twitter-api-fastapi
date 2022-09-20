@@ -59,6 +59,6 @@ user_id_examples = {
 
 
 # Enum
-class UserExamples(Enum):
+class UserExamples(dict, Enum):
     user_info = user_info_examples
     user_id = user_id_examples
