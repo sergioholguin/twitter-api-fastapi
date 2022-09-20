@@ -22,6 +22,7 @@ from origins import cros_origins
 # App
 app = FastAPI()
 app.include_router(router)
+
 app.add_middleware(BaseHTTPMiddleware, dispatch=process_time_header)
 app.add_middleware(
     CORSMiddleware,

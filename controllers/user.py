@@ -2,7 +2,7 @@
 from typing import List
 
 # FastAPI
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi import status, HTTPException
 from fastapi import Path, Body
 
@@ -18,6 +18,9 @@ from sql_app.database import mysql_engine as engine
 from sql_app.dependencies import get_db
 from .oauth2 import get_current_user, auth_dependencies
 
+# Background Tasks
+from background import write_notification
+
 # Tags
 from .tags import Tags
 
@@ -26,6 +29,7 @@ from examples import UserExamples
 
 # Create database tables
 sql_models.Base.metadata.create_all(engine)
+
 
 router = APIRouter(tags=[Tags.users])
 
@@ -39,7 +43,11 @@ router = APIRouter(tags=[Tags.users])
     status_code=status.HTTP_201_CREATED,
     summary='Register a User'
 )
-def signup(user: UserRegister = Body(..., examples=UserExamples.user_info), db: Session = Depends(get_db)):
+def signup(
+        background_tasks: BackgroundTasks,
+        user: UserRegister = Body(..., examples=UserExamples.user_info),
+        db: Session = Depends(get_db)
+):
     """
     SignUp
 
@@ -64,6 +72,10 @@ def signup(user: UserRegister = Body(..., examples=UserExamples.user_info), db: 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     new_user = crud.create_user(db, user)
+
+    default_message = f'{user.first_name.capitalize()} has been successfully signed up at {user.creation_account_date}!'
+    background_tasks.add_task(write_notification, email=user.email, message=default_message)
+
     return new_user
 
 
