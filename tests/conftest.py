@@ -18,17 +18,12 @@ from main import app
 password_example = "thisisthetestpassword"
 
 app.dependency_overrides[get_db] = override_get_db
+client = TestClient(app)
 
 
 # Fixtures
-@pytest.fixture(scope="session")
-def client() -> TestClient:
-    client = TestClient(app)
-    yield client
-
-
 @pytest.fixture(autouse=True)
-def dummy_user(client):
+def dummy_user():
     """Fixture to create test users before a test is run and delete them after it's completed."""
 
     # Define User
@@ -50,15 +45,14 @@ def dummy_user(client):
 
     # Login User
     response_user = client.post(
-        "/singup",
+        "/login",
         data={
-            "email": db_user.email,
-            "password": db_user.password,
+            "username": db_user.email,
+            "password": password_example,
         }
     )
 
     # Header
-    print(response_user.json())
     header_user = {"Authorization": "Bearer " + response_user.json()["access_token"]}
 
     # Here is where the testing happens

@@ -1,21 +1,46 @@
 
 # Libraries
 import pytest
-from uuid import UUID
 from fastapi import status
 from .conftest import client
 
 
 # Testing Functions
+
+## Login Tests
 @pytest.mark.auth
 def test_user_login():
     user = {
-        "email": "usertest1@example.com",
+        "username": "usertest1@example.com",
         "password": "thisisthetestpassword"
     }
 
     response = client.post("/login", data=user)
     assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.auth
+def test_user_not_in_db_login():
+    user = {
+        "username": "notindatabase@example.com",
+        "password": "thisisthetestpassword"
+    }
+
+    response = client.post("/login", data=user)
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Invalid Credentials"
+
+
+@pytest.mark.auth
+def test_user_incorrect_password_login():
+    user = {
+        "username": "usertest1@example.com",
+        "password": "incorrectpassword"
+    }
+
+    response = client.post("/login", data=user)
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["detail"] == "Incorrect Password"
 
 
 # @pytest.mark.user

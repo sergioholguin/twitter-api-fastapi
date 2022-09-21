@@ -1,7 +1,4 @@
 
-# Test
-import pytest
-
 # SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -27,4 +24,5 @@ def override_get_db():
         yield db
     finally:
         db.close()
+
 
