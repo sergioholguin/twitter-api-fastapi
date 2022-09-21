@@ -52,6 +52,15 @@ def create_user(db: Session, user: UserRegister):
     return db_user
 
 
+def create_user_if_not_exist(db: Session, user: UserRegister):
+    db_user = get_user_by_email(db, user.email)
+    if db_user:
+        return db_user
+    else:
+        user = create_user(db, user)
+        return user
+
+
 ## Delete
 def delete_user(db: Session, user_id: str):
     user_to_delete = get_user_by_id(db, user_id)
