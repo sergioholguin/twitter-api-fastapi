@@ -14,6 +14,7 @@ def hashed_password():
     return get_password_hash(password=user_example.password)
 
 
+# Register Tests
 @pytest.mark.user
 def test_register_user(hashed_password):
     db_user = {
@@ -54,21 +55,68 @@ def test_register_user(hashed_password):
 
 
 @pytest.mark.user
-def test_register_email_already_registered(set_up_user):
-    dummy_user, _ = set_up_user
+def test_register_email_already_registered(set_up_users):
+    dummy_user = set_up_users["user_1"]
 
-    user_info = jsonable_encoder(dummy_user)
-    response = client.post("/signup", json=user_info)
+    data_to_send = {
+        "first_name": dummy_user.first_name,
+        "last_name": dummy_user.last_name,
+        "email": dummy_user.email,
+        "password": user_example.password,
+        "country": dummy_user.country,
+        "birth_date": dummy_user.birth_date,
+        "creation_account_date": dummy_user.creation_account_date
+    }
+
+    response = client.post("/signup", json=jsonable_encoder(data_to_send))
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["detail"] == "Email already registered"
 
 
-# def test_show_nonexistent_user():
-#     user_id = "00000000-0000-0000-0000-000000000000"
-#     response = client.get(f"/users/{user_id}", headers={"X-Token": "coneofsilence"})
+# Show users Tests
+# def test_show_all_users(set_up_users):
+#     _, dummy_header = set_up_user
+#
+#     response = client.get('/users', headers=dummy_header)
 #     assert response.status_code == 404
 #     assert response.json() == {"detail": "User not found!"}
+
+
+@pytest.mark.user
+@pytest.mark.parametrize("user", ["user_1", "user_2"])
+def test_show_user(user, set_up_users):
+    dummy_header = set_up_users["header_1"]
+    user_to_search = set_up_users[user]
+
+    user_id = user_to_search.user_id
+    if user == "user_1":
+        response = client.get(f"/users/me", headers=dummy_header)  # Testing show me
+    else:
+        response = client.get(f"/users/{user_id}", headers=dummy_header)  # Testing show user by ID
+
+    expected_response = {
+        "user_id": user_to_search.user_id,
+        "email": user_to_search.email,
+        "first_name": user_to_search.first_name,
+        "last_name": user_to_search.last_name,
+        "country": user_to_search.country,
+        "birth_date": user_to_search.birth_date,
+        "creation_account_date": user_to_search.creation_account_date
+    }
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == jsonable_encoder(expected_response)
+
+
+@pytest.mark.user
+def test_show_nonexistent_user(set_up_users):
+    dummy_header = set_up_users["header_1"]
+
+    user_id = "00000000-0000-0000-0000-000000000000"
+    response = client.get(f"/users/{user_id}", headers=dummy_header)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == "User not found!"
 
 
 
