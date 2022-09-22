@@ -214,7 +214,6 @@ def delete_user(
 
     Returns a json with the user info with the following keys:
     - user_id: UUID
-    - email: EmailStr
     - delete_message: str
     """
 

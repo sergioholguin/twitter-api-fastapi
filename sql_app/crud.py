@@ -75,6 +75,13 @@ def delete_user(db: Session, user_id: str):
     return response
 
 
+def delete_user_if_exists(db: Session, user_id: str):
+    db_user = get_user_by_id(db, user_id)
+    if db_user:
+        response = delete_user(db, user_id)
+        return response
+
+
 ## Update
 def update_user(db: Session, user_id: str, new_user_info: UserRegister):
     # Updated Hashed Password

@@ -46,9 +46,11 @@ client = TestClient(app)
 # Fixtures
 @pytest.fixture
 def set_db():
-    Base.metadata.create_all(bind=mysql_test_engine)
-    yield
-    Base.metadata.drop_all(bind=mysql_test_engine)
+    try:
+        Base.metadata.create_all(bind=mysql_test_engine)
+        yield
+    finally:
+        Base.metadata.drop_all(bind=mysql_test_engine)
 
 
 @pytest.fixture(autouse=True)
@@ -92,5 +94,5 @@ def set_up_users(set_db):
     yield set_up_info
 
     # Delete user from database
-    crud.delete_user(test_database, db_user_1.user_id)
-    crud.delete_user(test_database, db_user_2.user_id)
+    crud.delete_user_if_exists(test_database, db_user_1.user_id)
+    crud.delete_user_if_exists(test_database, db_user_2.user_id)

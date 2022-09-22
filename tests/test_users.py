@@ -50,7 +50,7 @@ def test_register_user(hashed_password):
 
     assert response.status_code == status.HTTP_201_CREATED
     assert type(UUID(user_id)) == UUID
-    assert verify_password(user_example.password, db_user_hashed_password) == True
+    assert verify_password(user_example.password, db_user_hashed_password)
     assert response_info == db_user
 
 
@@ -84,8 +84,8 @@ def test_register_email_already_registered(set_up_users):
 
 
 @pytest.mark.user
-@pytest.mark.parametrize("user", ["user_1", "user_2"])
-def test_show_user(user, set_up_users):
+@pytest.mark.parametrize("user, show_test", [("user_1", "show me"), ("user_2", "show user")])
+def test_show_user(user, show_test, set_up_users):
     dummy_header = set_up_users["header_1"]
     user_to_search = set_up_users[user]
 
@@ -119,5 +119,40 @@ def test_show_nonexistent_user(set_up_users):
     assert response.json()["detail"] == "User not found!"
 
 
+@pytest.mark.user
+def test_delete_user(set_up_users):
+    dummy_header = set_up_users["header_1"]
+    user_to_delete = set_up_users["user_2"]
+
+    user_id = user_to_delete.user_id
+    response = client.delete(f'/users/{user_id}/delete', headers=dummy_header)
+
+    expected_response = {
+        "user_id": user_to_delete.user_id,
+        "delete_message": f'{user_to_delete.first_name} has been deleted successfully!'
+    }
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_response
 
 
+@pytest.mark.user
+def test_delete_user_failed(set_up_users):
+    dummy_header = set_up_users["header_1"]
+
+    user_id = "00000000-0000-0000-0000-000000000000"
+    response = client.delete(f'/users/{user_id}/delete', headers=dummy_header)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == "User doesn't exist!"
+
+
+# @pytest.mark.user
+# def test_delete_user_failed(set_up_users):
+#     dummy_header = set_up_users["header_1"]
+#
+#     user_id = "00000000-0000-0000-0000-000000000000"
+#     response = client.delete(f'/users/{user_id}/delete', headers=dummy_header)
+#
+#     assert response.status_code == status.HTTP_404_NOT_FOUND
+#     assert response.json()["detail"] == "User doesn't exist!"
