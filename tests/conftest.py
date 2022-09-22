@@ -4,9 +4,9 @@ from fastapi.testclient import TestClient
 
 # Database
 from models import UserRegister
-from tests.test_sql_app import override_get_db
+from tests.test_sql_app import override_get_db, mysql_test_engine
 from sql_app.dependencies import get_db
-
+from sql_app.database import Base
 
 # Others Tools
 from sql_app import crud
@@ -15,27 +15,36 @@ from sql_app import crud
 from main import app
 
 
-password_example = "thisisthetestpassword"
+# Define User
+user_example = UserRegister(
+    first_name="UserTest1",
+    last_name="SomeLastName",
+    email="usertest1@example.com",
+    password="thisisthetestpassword",
+    country="Peru",
+    birth_date="2001-01-01",
+    creation_account_date="2022-01-01"
+)
+
 
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 
 # Fixtures
+@pytest.fixture
+def set_db():
+    Base.metadata.create_all(bind=mysql_test_engine)
+    yield
+    Base.metadata.drop_all(bind=mysql_test_engine)
+
+
 @pytest.fixture(autouse=True)
-def dummy_user():
+def set_up_user(set_db):
     """Fixture to create test users before a test is run and delete them after it's completed."""
 
     # Define User
-    test_user = UserRegister(
-        first_name="UserTest1",
-        last_name="SomeLastName",
-        email="usertest1@example.com",
-        password=password_example,
-        country="Peru",
-        birth_date="2001-01-01",
-        creation_account_date="2022-01-01"
-    )
+    test_user = user_example
 
     # Open DB Session
     test_database = next(override_get_db())
@@ -48,7 +57,7 @@ def dummy_user():
         "/login",
         data={
             "username": db_user.email,
-            "password": password_example,
+            "password": user_example.password,
         }
     )
 
@@ -56,48 +65,7 @@ def dummy_user():
     header_user = {"Authorization": "Bearer " + response_user.json()["access_token"]}
 
     # Here is where the testing happens
-    yield header_user
+    yield test_user, header_user
 
     # Delete user from database
     crud.delete_user(test_database, db_user.user_id)
-
-# # Fixtures
-# @pytest.fixture
-# def hashed_password():
-#     return get_password_hash(password=password_example)
-#
-#
-# def set_up_users(hashed_password):
-#     # First User
-#     user_1 = {
-#         "user_id": UUID,
-#         "email": "usertest1@example.com",
-#         "password": hashed_password,
-#         "first_name": "UserTest1",
-#         "last_name": "SomeLastName",
-#         "country": "Peru",
-#         "birthday": "2001-01-01",
-#         "creation_account_date": "2022-01-01"
-#     }
-#
-#     response_user_1 = client.post(
-#         "/singup",
-#         json={
-#             "email": "usertest1@example.com",
-#             "password": password_example,
-#             "first_name": "UserTest1",
-#             "last_name": "SomeLastName",
-#             "country": "Peru",
-#             "birthday": "2001-01-01",
-#             "creation_account_date": "2022-01-01"
-#         }
-#     )
-#
-#     header_user_1 = {"Authorization": "Bearer " + response_user_1.json()["access_token"]}
-#
-#     # Second User
-#     user_1_hashed_password = user_1.pop('password', None)
-#
-#     assert response_user_1.status_code == 201
-#     assert verify_password(password_example, user_1_hashed_password) == True
-#     assert response_user_1.json() == user_1

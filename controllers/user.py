@@ -63,7 +63,7 @@ def signup(
     - first_name: str
     - last_name: str
     - country: Optional[str]
-    - birthday: Optional[PastDate]
+    - birth_date: Optional[PastDate]
     - creation_account_date: PastDate
     """
 
@@ -101,7 +101,7 @@ def show_all_users(db: Session = Depends(get_db)):
     - first_name: str
     - last_name: str
     - country: Optional[str]
-    - birthday: Optional[PastDate]
+    - birth_date: Optional[PastDate]
     - creation_account_date: PastDate
     """
 
@@ -132,7 +132,7 @@ def show_user(
     - first_name: str
     - last_name: str
     - country: Optional[str]
-    - birthday: Optional[PastDate]
+    - birth_date: Optional[PastDate]
     - creation_account_date: PastDate
     """
 
@@ -173,7 +173,7 @@ def show_user(
     - first_name: str
     - last_name: str
     - country: Optional[str]
-    - birthday: Optional[PastDate]
+    - birth_date: Optional[PastDate]
     - creation_account_date: PastDate
     """
 
@@ -265,7 +265,7 @@ def update_user(
     - first_name: str
     - last_name: str
     - country: Optional[str]
-    - birthday: Optional[PastDate]
+    - birth_date: Optional[PastDate]
     - creation_account_date: PastDate
     """
 
