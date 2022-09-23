@@ -26,7 +26,7 @@ Features included:
 
 - SQL Alchemy and a MySQL Database
 
-- Testin with pytest
+- Testing with pytest
 
 ## Requirements:
 
