@@ -1,4 +1,8 @@
 
+# Signal
+import signal
+from .overtime_signal import TimeOutException, TIMEOUT
+
 # Testing
 import pytest
 from fastapi.testclient import TestClient
@@ -6,7 +10,6 @@ from fastapi.testclient import TestClient
 # Database
 from models import UserRegister
 from tests.test_sql_app import override_get_db, mysql_test_engine
-from sql_app.sqlalchemy_models import UserDB
 from sql_app.dependencies import get_db
 from sql_app.database import Base
 
@@ -48,7 +51,14 @@ client = TestClient(app)
 def set_db():
     try:
         Base.metadata.create_all(bind=mysql_test_engine)
+
+        # Signal that cancel test if last more than 5 second
+        signal.alarm(TIMEOUT)
+
         yield
+
+    except Exception:
+        raise TimeOutException('Database Error!')
     finally:
         Base.metadata.drop_all(bind=mysql_test_engine)
 
