@@ -15,6 +15,7 @@ def hashed_password():
 
 
 # Register Tests
+@pytest.mark.create
 @pytest.mark.user
 def test_register_user(hashed_password):
     db_user = {
@@ -54,6 +55,7 @@ def test_register_user(hashed_password):
     assert response_info == db_user
 
 
+@pytest.mark.create
 @pytest.mark.user
 def test_register_email_already_registered(set_up_users):
     dummy_user = set_up_users["user_1"]
@@ -75,14 +77,34 @@ def test_register_email_already_registered(set_up_users):
 
 
 # Show users Tests
-# def test_show_all_users(set_up_users):
-#     _, dummy_header = set_up_user
-#
-#     response = client.get('/users', headers=dummy_header)
-#     assert response.status_code == 404
-#     assert response.json() == {"detail": "User not found!"}
+@pytest.mark.show
+@pytest.mark.user
+def test_show_all_users(set_up_users):
+    dummy_header = set_up_users["header_1"]
+    user_1 = set_up_users["user_1"]
+    user_2 = set_up_users["user_2"]
+
+    response = client.get('/users', headers=dummy_header)
+
+    def expected_user_info(user):
+        user_dict = {
+            "user_id": user.user_id,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "country": user.country,
+            "birth_date": str(user.birth_date),
+            "creation_account_date": str(user.creation_account_date)
+        }
+        return user_dict
+
+    expected_response = [expected_user_info(user_1), expected_user_info(user_2)]
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_response
 
 
+@pytest.mark.show
 @pytest.mark.user
 @pytest.mark.parametrize("user, show_test", [("user_1", "show me"), ("user_2", "show user")])
 def test_show_user(user, show_test, set_up_users):
@@ -109,6 +131,7 @@ def test_show_user(user, show_test, set_up_users):
     assert response.json() == jsonable_encoder(expected_response)
 
 
+@pytest.mark.show
 @pytest.mark.user
 def test_show_nonexistent_user(set_up_users):
     dummy_header = set_up_users["header_1"]
@@ -119,23 +142,8 @@ def test_show_nonexistent_user(set_up_users):
     assert response.json()["detail"] == "User not found!"
 
 
-@pytest.mark.user
-def test_delete_user(set_up_users):
-    dummy_header = set_up_users["header_1"]
-    user_to_delete = set_up_users["user_2"]
-
-    user_id = user_to_delete.user_id
-    response = client.delete(f'/users/{user_id}/delete', headers=dummy_header)
-
-    expected_response = {
-        "user_id": user_to_delete.user_id,
-        "delete_message": f'{user_to_delete.first_name} has been deleted successfully!'
-    }
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == expected_response
-
-
+# Delete users Tests
+@pytest.mark.delete
 @pytest.mark.user
 def test_delete_user_failed(set_up_users):
     dummy_header = set_up_users["header_1"]
@@ -147,12 +155,75 @@ def test_delete_user_failed(set_up_users):
     assert response.json()["detail"] == "User doesn't exist!"
 
 
-# @pytest.mark.user
-# def test_delete_user_failed(set_up_users):
-#     dummy_header = set_up_users["header_1"]
-#
-#     user_id = "00000000-0000-0000-0000-000000000000"
-#     response = client.delete(f'/users/{user_id}/delete', headers=dummy_header)
-#
-#     assert response.status_code == status.HTTP_404_NOT_FOUND
-#     assert response.json()["detail"] == "User doesn't exist!"
+@pytest.mark.delete
+@pytest.mark.user
+def test_delete_user(set_up_users):
+    dummy_header = set_up_users["header_1"]
+    user_to_delete = set_up_users["user_2"]
+
+    user_id = user_to_delete.user_id
+    response = client.delete(f'/users/{user_id}/delete', headers=dummy_header)
+
+    expected_response = {
+        "user_id": user_id,
+        "delete_message": f'{user_to_delete.first_name} has been deleted successfully!'
+    }
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == expected_response
+
+
+# Update users Tests
+@pytest.mark.update
+@pytest.mark.user
+def test_update_user_failed(set_up_users):
+    dummy_header = set_up_users["header_1"]
+    user_to_update = set_up_users["user_2"]
+
+    user_id = "00000000-0000-0000-0000-000000000000"
+
+    data_to_send = {
+        "first_name": "New First Name",
+        "last_name": "New Last Name",
+        "email": user_to_update.email,
+        "password": user_example.password,
+        "country": user_to_update.country,
+        "birth_date": user_to_update.birth_date,
+        "creation_account_date": user_to_update.creation_account_date
+    }
+
+    response = client.put(f'/users/{user_id}/update', json=jsonable_encoder(data_to_send), headers=dummy_header)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == "User doesn't exist!"
+
+
+@pytest.mark.update
+@pytest.mark.user
+def test_update_user(set_up_users):
+    dummy_header = set_up_users["header_1"]
+    user_to_update = set_up_users["user_2"]
+
+    user_id = user_to_update.user_id
+
+    data_to_send = {
+        "first_name": "New First Name",
+        "last_name": "New Last Name",
+        "email": user_to_update.email,
+        "password": user_example.password,
+        "country": user_to_update.country,
+        "birth_date": user_to_update.birth_date,
+        "creation_account_date": user_to_update.creation_account_date
+    }
+
+    response = client.put(f'/users/{user_id}/update', json=jsonable_encoder(data_to_send), headers=dummy_header)
+
+    expected_response = data_to_send.copy()
+    expected_response.update({'user_id': user_id})
+    expected_response.pop("password")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == jsonable_encoder(expected_response)
+
+
+

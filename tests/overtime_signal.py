@@ -3,7 +3,7 @@
 import signal
 
 
-TIMEOUT = 5
+TIMEOUT = 8
 
 
 # TimeOutException

@@ -105,4 +105,4 @@ def set_up_users(set_db):
 
     # Delete user from database
     crud.delete_user_if_exists(test_database, db_user_1.user_id)
-    crud.delete_user_if_exists(test_database, db_user_2.user_id)
+    # crud.delete_user_if_exists(test_database, db_user_2.user_id)

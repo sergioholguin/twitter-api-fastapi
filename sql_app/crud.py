@@ -77,9 +77,9 @@ def delete_user(db: Session, user_id: str):
 
 def delete_user_if_exists(db: Session, user_id: str):
     db_user = get_user_by_id(db, user_id)
-    if db_user:
-        response = delete_user(db, user_id)
-        return response
+    if db_user is not None:
+        db.query(UserDB).filter(UserDB.user_id == user_id).delete()
+        db.commit()
 
 
 ## Update
