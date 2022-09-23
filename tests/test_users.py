@@ -33,19 +33,17 @@ def test_register_user(hashed_password):
         "creation_account_date": "2022-09-09"
     }
 
-    response = client.post(
-        "/signup",
-        json={
-            "first_name": "Anthony",
-            "last_name": "SomeLastName",
-            "email": "anthony@example.com",
-            "password": user_example.password,
-            "country": "Peru",
-            "birth_date": "2001-01-01",
-            "creation_account_date": "2022-09-09"
-        }
-    )
+    data_to_send = {
+        "first_name": "Anthony",
+        "last_name": "SomeLastName",
+        "email": "anthony@example.com",
+        "password": user_example.password,
+        "country": "Peru",
+        "birth_date": "2001-01-01",
+        "creation_account_date": "2022-09-09"
+    }
 
+    response = client.post("/signup", json=jsonable_encoder(data_to_send))
     response_info = response.json()
 
     # Remove Keys
