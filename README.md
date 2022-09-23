@@ -26,6 +26,8 @@ Features included:
 
 - SQL Alchemy and a MySQL Database
 
+- Testin with pytest
+
 ## Requirements:
 
 - Python 3.8.5
