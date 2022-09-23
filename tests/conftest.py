@@ -1,4 +1,3 @@
-
 # Signal
 import signal
 from .overtime_signal import TimeOutException, TIMEOUT
@@ -18,7 +17,6 @@ from sql_app import crud
 
 # App
 from main import app
-
 
 # Define User
 user_example = UserRegister(
@@ -40,7 +38,6 @@ user_another_example = UserRegister(
     birth_date="2011-01-01",
     creation_account_date="2022-02-02"
 )
-
 
 app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
@@ -65,7 +62,7 @@ def set_db():
 
 @pytest.fixture(autouse=True)
 def set_up_users(set_db):
-    """Fixture to create test users before a test is run and delete them after it's completed."""
+    """Fixture to create test users."""
 
     # Define User
     test_user_1 = user_example
@@ -106,3 +103,48 @@ def set_up_users(set_db):
     # Delete user from database
     crud.delete_user_if_exists(test_database, db_user_1.user_id)
     # crud.delete_user_if_exists(test_database, db_user_2.user_id)
+
+
+@pytest.fixture()
+def set_up_tweets(set_up_users):
+    """Fixture to create test tweets"""
+
+    # Open DB Session
+    test_database = next(override_get_db())
+
+    # Function to make tweets
+    def make_tweets_from_user(user_number):
+        user_info = set_up_users[f'user_{user_number}']
+        header = set_up_users[f'header_{user_number}']
+
+        # Post Tweets
+        response_tweet_1 = client.post(
+            "/post",
+            json={"content": f'First Test Tweet Text from User_{user_number}, provisional name.'},
+            headers=header
+        )
+        response_tweet_2 = client.post(
+            "/post",
+            json={"content": f'Second Test Tweet Text from User_{user_number}, provisional name.'},
+            headers=header
+        )
+
+        return {
+            "user_info": user_info,
+            "header": header,
+            "tweet_1": response_tweet_1.json(),
+            "tweet_2": response_tweet_2.json()
+        }
+
+    # Information to yield
+    set_up_tweet_info = {
+        "user_1": make_tweets_from_user(1),
+        "user_2": make_tweets_from_user(2)
+    }
+
+    # Here is where the testing happens
+    yield set_up_tweet_info
+
+    # Delete tweets from database
+    crud.delete_tweets_by_user(test_database, set_up_tweet_info["user_1"]["user_info"].user_id)
+    crud.delete_tweets_by_user(test_database, set_up_tweet_info["user_2"]["user_info"].user_id)

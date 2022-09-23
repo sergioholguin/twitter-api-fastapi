@@ -146,6 +146,11 @@ def delete_tweet(db: Session, tweet_id: str):
     return response
 
 
+def delete_tweets_by_user(db: Session, user_id: str):
+    db.query(TweetDB).filter(TweetDB.user_id == user_id).delete()
+    db.commit()
+
+
 ## Update
 def update_tweet(db: Session, tweet_id: str, new_tweet_info: UpdateTweet):
     new_tweet_info = new_tweet_info.dict()

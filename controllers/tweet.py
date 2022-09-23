@@ -154,7 +154,7 @@ def show_tweet(
     - content: str
     - created_at: datetime
     - updated_at: Optional[datetime]
-    - by: User
+    - user_id: str
     """
 
     db_tweet = crud.get_tweet_by_id(db, tweet_id)

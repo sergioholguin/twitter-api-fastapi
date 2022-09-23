@@ -1,3 +1,4 @@
+
 # Libraries
 import pytest
 from fastapi import status
@@ -6,6 +7,9 @@ from sql_app.hashing import get_password_hash, verify_password
 from .conftest import user_example
 from .conftest import client
 from uuid import UUID
+
+# Models
+from models import User
 
 
 # Fixtures
@@ -81,27 +85,15 @@ def test_register_email_already_registered(set_up_users):
 @pytest.mark.user
 def test_show_all_users(set_up_users):
     dummy_header = set_up_users["header_1"]
-    user_1 = set_up_users["user_1"]
-    user_2 = set_up_users["user_2"]
 
     response = client.get('/users', headers=dummy_header)
-
-    def expected_user_info(user):
-        user_dict = {
-            "user_id": user.user_id,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "country": user.country,
-            "birth_date": str(user.birth_date),
-            "creation_account_date": str(user.creation_account_date)
-        }
-        return user_dict
-
-    expected_response = [expected_user_info(user_1), expected_user_info(user_2)]
+    response_info = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == expected_response
+
+    # Verify if all response are tweets
+    for user_dict_info in response_info:
+        User(**user_dict_info)
 
 
 @pytest.mark.show
